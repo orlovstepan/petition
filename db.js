@@ -18,3 +18,16 @@ module.exports.addUser = (first_name, last_name, signature) => {
 
     return db.query(q, params);
 };
+
+module.exports.getSignature = (id) => {
+    const q = `SELECT signature FROM signatures WHERE id = $1;`;
+    const params = [id];
+    return db.query(q, params);
+};
+
+module.exports.registerUser = (first, last, email, password) => {
+    const q = `INSERT INTO signatures (first_name, last_name, signature)
+    values ($1, $2, $3, $4)`;
+    const params = [first, last, email, password];
+    return db.query(q, params);
+};

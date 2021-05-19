@@ -57,6 +57,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/petition", (req, res) => {
+    // console.log(req.session);
     if (req.session.signed) {
         res.redirect("/thanks");
     } else {
@@ -67,8 +68,22 @@ app.get("/petition", (req, res) => {
 });
 
 app.get("/thanks", (req, res) => {
-    //FINISH HERE
-    res.render("thanks");
+    //FINISH HERE TO SHOW THE SIGNATURE OF THE PERSON WHO SIGNED THE PETITION
+    if (req.session.signed) {
+        const sigId = req.session.signatureId;
+        db.getSignature(sigId)
+            .then(({ rows }) => {
+                let signImage = rows[0].signature;
+                res.render("thanks", {
+                    signImage,
+                });
+            })
+            .catch((e) => {
+                console.log("error in getSignature:", e);
+            });
+    } else {
+        res.render("petition");
+    }
 });
 
 app.get("/signers", (req, res) => {
@@ -88,20 +103,38 @@ app.post("/petition", (req, res) => {
     db.addUser(req.body.firstname, req.body.lastname, req.body.signature)
         .then(({ rows }) => {
             // console.log("rows", rows);
-            req.session.cookie = "signed";
+            req.session.signed = true;
             req.session.signatureId = rows[0].id;
             // console.log(result.rows[0].id);
-            const signature = rows[0].signature;
+            const signImage = rows[0].signature;
             // console.log("signature", signature);
             // res.redirect("/thanks");
             res.render("thanks", {
-                signature,
+                signImage,
             });
         })
         .catch((e) => {
             console.log("error", e);
         });
     // res.cookie("signed", true);
+});
+
+app.get("/registration", (req, res) => {
+    res.render("registration");
+});
+
+app.post("/registration", (req, res) => {
+    // console.log(req.body);
+    // db.registerUser()
+    // res.render("registration");
+});
+
+app.get("/login", (req, res) => {
+    res.render("login");
+});
+
+app.post("/login", (req, res) => {
+    res.render("login");
 });
 
 app.listen(8080, () => console.log("Petition up and running!"));
