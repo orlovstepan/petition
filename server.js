@@ -2,13 +2,35 @@ const express = require("express");
 const app = express();
 const db = require("./db");
 const hb = require("express-handlebars");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+const csurf = require("csurf");
 
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
-app.use(cookieParser());
-app.use(express.urlencoded());
+// app.use(cookieParser());
+
+app.use(
+    express.urlencoded({
+        extended: false,
+    })
+);
+
 app.use(express.static("./public"));
+
+app.use(
+    cookieSession({
+        secret: `I'm always angry.`,
+        maxAge: 1000 * 60 * 60 * 24 * 14,
+    })
+);
+
+app.use(csurf());
+
+app.use(function (req, res, next) {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 
 // app.get("/cities", (req, res) => {
 //     console.log("made it to the cities route");
@@ -30,27 +52,56 @@ app.use(express.static("./public"));
 //         .catch((e) => console.log(e));
 // });
 
+app.get("/", (req, res) => {
+    res.redirect("/petition");
+});
+
 app.get("/petition", (req, res) => {
-    // if (req.cookies.signed) {
-    //     res.redirect("/thanks");
-    // }
-    res.render("petition", {
-        layout: "main",
-    });
+    if (req.session.signed) {
+        res.redirect("/thanks");
+    } else {
+        res.render("petition", {
+            layout: "main",
+        });
+    }
 });
 
 app.get("/thanks", (req, res) => {
+    //FINISH HERE
     res.render("thanks");
 });
 
 app.get("/signers", (req, res) => {
-    res.render("signers");
+    db.getSigners()
+        .then(({ rows }) => {
+            res.render("signers", {
+                rows,
+            });
+        })
+        .catch((e) => {
+            console.log("error:", e);
+        });
 });
 
 app.post("/petition", (req, res) => {
-    db.addUser(`req.body.firstname req.body.lastname req.body.signature`);
-    res.cookie("signed", true);
-    res.redirect("/thanks");
+    // console.log("req.body", req.body);
+    db.addUser(req.body.firstname, req.body.lastname, req.body.signature)
+        .then(({ rows }) => {
+            // console.log("rows", rows);
+            req.session.cookie = "signed";
+            req.session.signatureId = rows[0].id;
+            // console.log(result.rows[0].id);
+            const signature = rows[0].signature;
+            // console.log("signature", signature);
+            // res.redirect("/thanks");
+            res.render("thanks", {
+                signature,
+            });
+        })
+        .catch((e) => {
+            console.log("error", e);
+        });
+    // res.cookie("signed", true);
 });
 
 app.listen(8080, () => console.log("Petition up and running!"));
