@@ -2,9 +2,9 @@ const express = require("express");
 const app = express();
 const db = require("./db");
 const hb = require("express-handlebars");
-// const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const csurf = require("csurf");
+const { hash, compare } = require("./utils/bc");
 
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
@@ -125,8 +125,28 @@ app.get("/registration", (req, res) => {
 
 app.post("/registration", (req, res) => {
     // console.log(req.body);
-    // db.registerUser()
-    // res.render("registration");
+    if (
+        !req.body.firstname ||
+        !req.body.lastname ||
+        !req.body.email ||
+        !req.body.password
+    ) {
+        res.render("registration", {
+            errorMsg: "Please fill out all the fields",
+        });
+    } else {
+        hash(req.body.password)
+            .then((hashedPw) =>
+                db.registerUser(
+                    req.body.firstname,
+                    req.body.lastname,
+                    req.body.email,
+                    hashedPw
+                )
+            )
+            .then(() => res.redirect("/petition"))
+            .catch((e) => console.log("error in hash", e));
+    }
 });
 
 app.get("/login", (req, res) => {

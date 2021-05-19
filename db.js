@@ -26,7 +26,7 @@ module.exports.getSignature = (id) => {
 };
 
 module.exports.registerUser = (first, last, email, password) => {
-    const q = `INSERT INTO signatures (first_name, last_name, signature)
+    const q = `INSERT INTO users (first, last, email, password)
     values ($1, $2, $3, $4)`;
     const params = [first, last, email, password];
     return db.query(q, params);
