@@ -26,8 +26,17 @@ module.exports.getSignature = (id) => {
 };
 
 module.exports.registerUser = (first, last, email, password) => {
-    const q = `INSERT INTO users (first, last, email, password)
-    values ($1, $2, $3, $4)`;
+    const q = `
+    INSERT INTO users (first, last, email, password)
+    values ($1, $2, $3, $4)
+    RETURNING id
+    `;
     const params = [first, last, email, password];
+    return db.query(q, params);
+};
+
+module.exports.isUser = (email) => {
+    const q = `SELECT password FROM users WHERE email = $1;`;
+    const params = [email];
     return db.query(q, params);
 };

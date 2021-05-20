@@ -32,26 +32,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-// app.get("/cities", (req, res) => {
-//     console.log("made it to the cities route");
-//     db.getCities()
-//         .then((result) => {
-//             console.log("result", result);
-//         })
-//         .catch((e) => console.log(e));
-// });
-
-//would normally use a post request for this
-
-// app.get("/add-city", (req, res) => {
-//     console.log("made it to add city");
-//     db.addCity("Lima", 10555000, "Peru")
-//         .then((result) => {
-//             console.log("result", result);
-//         })
-//         .catch((e) => console.log(e));
-// });
-
 app.get("/", (req, res) => {
     res.redirect("/petition");
 });
@@ -102,8 +82,9 @@ app.post("/petition", (req, res) => {
     // console.log("req.body", req.body);
     db.addUser(req.body.firstname, req.body.lastname, req.body.signature)
         .then(({ rows }) => {
-            // console.log("rows", rows);
+            // console.log("req.session", req.session);
             req.session.signed = true;
+            // console.log("req.session after cookies", req.session);
             req.session.signatureId = rows[0].id;
             // console.log(result.rows[0].id);
             const signImage = rows[0].signature;
@@ -136,15 +117,20 @@ app.post("/registration", (req, res) => {
         });
     } else {
         hash(req.body.password)
-            .then((hashedPw) =>
+            .then((hashedPw) => {
                 db.registerUser(
                     req.body.firstname,
                     req.body.lastname,
                     req.body.email,
                     hashedPw
                 )
-            )
-            .then(() => res.redirect("/petition"))
+                    .then(({ rows }) => {
+                        //setting up cookie
+                        req.session.userId = rows[0].id;
+                        res.redirect("/petition");
+                    })
+                    .catch((e) => console.log(e));
+            })
             .catch((e) => console.log("error in hash", e));
     }
 });
@@ -154,7 +140,25 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    res.render("login");
+    if (!req.body.email || !req.body.password) {
+        res.render("login", {
+            errorMsg: "Please fill out all the fields",
+        });
+    } else {
+        db.isUser(req.body.email)
+            .then(({ rows }) => rows[0].password)
+            .then((password) => {
+                compare(req.body.password, password)
+                    .then(({ rows }) => {
+                        req.session.userId = rows[0].id;
+                        res.redirect("/petition");
+                    })
+                    .catch((e) => res.render("login"), {
+                        errorMsg: "Email or Password is incorrect",
+                    });
+            })
+            .catch((e) => console.log("error in login", e));
+    }
 });
 
 app.listen(8080, () => console.log("Petition up and running!"));

@@ -1,9 +1,13 @@
 Please log in
-<form>
+<form method="POST">
     <label for="email"> Email Address</label>
     <input type="text" name="email" id="email" />
     <label for="password"> Password</label>
     <input type="password" name="password" id="password" />
     <button id="login">Log in</button>
-
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 </form>
+
+{{#if errorMsg}}
+    <p>{{errorMsg}}</p>
+{{/if}}
