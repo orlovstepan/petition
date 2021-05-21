@@ -10,7 +10,23 @@ module.exports.getSigners = () => {
     SELECT first, last, user_profiles.age, user_profiles.city FROM users
     JOIN user_profiles
     ON users.id = user_profiles.id
+    JOIN signatures
+    ON signatures.id = users.id; 
     `);
+};
+
+module.exports.getByCity = (city) => {
+    const q = `
+    SELECT users.first, users.last, age 
+    FROM user_profiles
+    RIGHT JOIN users
+    ON user_profiles.id = users.id
+    JOIN signatures
+    ON signatures.id = users.id
+    WHERE LOWER(city) = LOWER($1)
+    `;
+    const params = [city];
+    return db.query(q, params);
 };
 
 module.exports.addUser = (signature) => {

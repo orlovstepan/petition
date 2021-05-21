@@ -5,6 +5,17 @@ const hb = require("express-handlebars");
 const cookieSession = require("cookie-session");
 const csurf = require("csurf");
 const { hash, compare } = require("./utils/bc");
+const COOKIE_SECRET =
+    process.env.COOKIE_SECRET || require("./secrets.json").COOKIE_SECRET;
+
+if (process.env.NODE_ENV == "production") {
+    app.use((req, res, next) => {
+        if (req.headers["x-forwarded-proto"].startsWith("https")) {
+            return next();
+        }
+        res.redirect(`https://${req.hostname}${req.url}`);
+    });
+}
 
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
@@ -20,7 +31,7 @@ app.use(express.static("./public"));
 
 app.use(
     cookieSession({
-        secret: `I'm always angry.`,
+        secret: COOKIE_SECRET,
         maxAge: 1000 * 60 * 60 * 24 * 14,
     })
 );
@@ -69,7 +80,7 @@ app.get("/thanks", (req, res) => {
 app.get("/signers", (req, res) => {
     db.getSigners()
         .then(({ rows }) => {
-            console.log(rows);
+            // console.log(rows);
             res.render("signers", {
                 rows,
             });
@@ -77,6 +88,15 @@ app.get("/signers", (req, res) => {
         .catch((e) => {
             console.log("error:", e);
         });
+});
+
+app.get("/signers/:city", (req, res) => {
+    db.getByCity(req.params.city).then(({ rows }) => {
+        console.log(rows);
+        res.render("cities", {
+            rows,
+        }).catch((e) => console.log("error in cities", e));
+    });
 });
 
 app.post("/petition", (req, res) => {
