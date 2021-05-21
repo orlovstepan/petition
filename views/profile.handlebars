@@ -1,0 +1,12 @@
+<h1>Tell us a little bit more about yourself if you like!</h1>
+
+<form method="POST">
+    <label for="age"> Age </label>
+    <input type="text" id="age" name="age" />
+    <label for="city"> City</label>
+    <input type="text" id="city" name="city" />
+    <label for="website"> Website</label>
+    <input type="text" name="website" id="website" />
+    <button id="continue"> Continue</button>
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+</form>

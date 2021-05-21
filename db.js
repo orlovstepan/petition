@@ -1,20 +1,26 @@
 const spicedPg = require("spiced-pg");
-const db = spicedPg("postgres:postgres:postgres:@localhost:5432/petition");
+const db = spicedPg(
+    process.env.DATABASE_URL ||
+        "postgres:postgres:postgres:@localhost:5432/petition"
+);
 //the last bit of this line is the database we're connecting to
 
 module.exports.getSigners = () => {
-    // here we talk to the tables in the database
-    return db.query(`SELECT first_name, last_name FROM signatures`);
+    return db.query(`
+    SELECT first, last, user_profiles.age, user_profiles.city FROM users
+    JOIN user_profiles
+    ON users.id = user_profiles.id
+    `);
 };
 
-module.exports.addUser = (first_name, last_name, signature) => {
+module.exports.addUser = (signature) => {
     const q = `
-    INSERT INTO signatures (first_name, last_name, signature)
-    values ($1, $2, $3)
+    INSERT INTO signatures (signature)
+    values ($1)
     RETURNING *
     `;
 
-    const params = [first_name, last_name, signature];
+    const params = [signature];
 
     return db.query(q, params);
 };
@@ -36,7 +42,15 @@ module.exports.registerUser = (first, last, email, password) => {
 };
 
 module.exports.isUser = (email) => {
-    const q = `SELECT password FROM users WHERE email = $1;`;
+    const q = `SELECT password, id FROM users WHERE email = $1;`;
     const params = [email];
+    return db.query(q, params);
+};
+
+module.exports.userProfile = (age, city, url, user_id) => {
+    const q = `
+    INSERT INTO user_profiles (age, city, url, user_id) values ($1, $2, $3, $4);
+    `;
+    const params = [age, city, url, user_id];
     return db.query(q, params);
 };

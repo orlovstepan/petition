@@ -37,18 +37,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/petition", (req, res) => {
-    // console.log(req.session);
-    if (req.session.signed) {
-        res.redirect("/thanks");
+    if (!req.session.userId) {
+        res.redirect("/registration");
     } else {
-        res.render("petition", {
-            layout: "main",
-        });
+        if (req.session.signed) {
+            res.redirect("/thanks");
+        } else {
+            res.render("petition");
+        }
     }
 });
 
 app.get("/thanks", (req, res) => {
-    //FINISH HERE TO SHOW THE SIGNATURE OF THE PERSON WHO SIGNED THE PETITION
     if (req.session.signed) {
         const sigId = req.session.signatureId;
         db.getSignature(sigId)
@@ -69,6 +69,7 @@ app.get("/thanks", (req, res) => {
 app.get("/signers", (req, res) => {
     db.getSigners()
         .then(({ rows }) => {
+            console.log(rows);
             res.render("signers", {
                 rows,
             });
@@ -79,8 +80,8 @@ app.get("/signers", (req, res) => {
 });
 
 app.post("/petition", (req, res) => {
-    // console.log("req.body", req.body);
-    db.addUser(req.body.firstname, req.body.lastname, req.body.signature)
+    console.log("req.body", req.body);
+    db.addUser(req.body.signature)
         .then(({ rows }) => {
             // console.log("req.session", req.session);
             req.session.signed = true;
@@ -126,8 +127,9 @@ app.post("/registration", (req, res) => {
                 )
                     .then(({ rows }) => {
                         //setting up cookie
+                        console.log("userID in registration:", rows[0].id);
                         req.session.userId = rows[0].id;
-                        res.redirect("/petition");
+                        res.redirect("/profile");
                     })
                     .catch((e) => console.log(e));
             })
@@ -145,12 +147,18 @@ app.post("/login", (req, res) => {
             errorMsg: "Please fill out all the fields",
         });
     } else {
+        let userId;
         db.isUser(req.body.email)
-            .then(({ rows }) => rows[0].password)
+            .then(({ rows }) => {
+                console.log("rows in login", rows);
+                userId = rows[0].id;
+                return rows[0].password;
+            })
             .then((password) => {
                 compare(req.body.password, password)
-                    .then(({ rows }) => {
-                        req.session.userId = rows[0].id;
+                    .then((auth) => {
+                        req.session.userId = userId;
+                        console.log("cookie in login", req.session);
                         res.redirect("/petition");
                     })
                     .catch((e) => res.render("login"), {
@@ -161,4 +169,22 @@ app.post("/login", (req, res) => {
     }
 });
 
-app.listen(8080, () => console.log("Petition up and running!"));
+app.get("/profile", (req, res) => {
+    res.render("profile");
+});
+
+app.post("/profile", (req, res) => {
+    console.log("userID in profile:", req.session.userId);
+    db.userProfile(
+        req.body.age,
+        req.body.city,
+        req.body.url,
+        req.session.userId
+    )
+        .then(() => res.redirect("/petition"))
+        .catch((e) => console.log(e));
+});
+
+app.listen(process.env.PORT || 8080, () =>
+    console.log("Petition up and running!")
+);
