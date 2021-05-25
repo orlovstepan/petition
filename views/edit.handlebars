@@ -1,0 +1,29 @@
+<h1>Edit your profile here</h1>
+
+<form method="POST">
+    <label for="firstname"> First name </label>
+    <input
+        type="text"
+        id="firstname"
+        name="firstname"
+        value="{{rows.0.first}}"
+    />
+    <label for="lastname"> Last name </label>
+    <input type="text" id="lastname" name="lastname" value="{{rows.0.last}}" />
+    <label for="age"> Age </label>
+    <input type="text" id="age" name="age" value="{{rows.0.age}}" />
+    <label for="city"> City</label>
+    <input type="text" id="city" name="city" value="{{rows.0.city}}" />
+    <label for="website"> Website</label>
+    <input type="text" name="website" id="website" value="{{rows.0.website}}" />
+    <label for="email"> Email</label>
+    <input type="text" name="email" id="email" value="{{rows.0.email}}" />
+    <label for="password"> Password</label>
+    <input type="text" name="password" id="password" />
+    <button id="update"> Update</button>
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+</form>
+
+{{#if msg}}
+    <p>{{msg}}</p>
+{{/if}}

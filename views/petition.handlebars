@@ -1,20 +1,18 @@
-<form method="POST">
-    {{! <input
+<div class="container-petition">
+    <h1>don't miss your chance to leave things as they are.</h1>
+    <h2>sign below</h2>
+    <form method="POST" id="petition">
+        {{! <input
         type="text"
         id="firstname"
         placeholder="First name"
         name="firstname"
     />
     <input type="text" id="lastname" placeholder="Last name" name="lastname" /> }}
-    <input
-        type="hidden"
-        width="200"
-        height="100"
-        name="signature"
-        id="signature"
-    />
-    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-    <canvas id="signature-field" width="200" height="100"></canvas>
-    <button id="submit">Submit</button>
-</form>
-<script src="/script.js"></script>
+        <input type="hidden" name="signature" id="signature" />
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        <canvas id="signature-field"></canvas>
+        <button id="submit">submit</button>
+    </form>
+    <script src="/script.js"></script>
+</div>

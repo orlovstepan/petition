@@ -5,6 +5,13 @@ const hb = require("express-handlebars");
 const cookieSession = require("cookie-session");
 const csurf = require("csurf");
 const { hash, compare } = require("./utils/bc");
+const {
+    requireLoggedInUser,
+    requireLoggedOutUser,
+    requireNoSignature,
+    requireSignature,
+} = require("./middleware");
+
 const COOKIE_SECRET =
     process.env.COOKIE_SECRET || require("./secrets.json").COOKIE_SECRET;
 
@@ -43,64 +50,29 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(requireLoggedInUser);
+
 app.get("/", (req, res) => {
     res.redirect("/petition");
 });
 
-app.get("/petition", (req, res) => {
-    if (!req.session.userId) {
-        res.redirect("/registration");
-    } else {
-        if (req.session.signed) {
-            res.redirect("/thanks");
-        } else {
-            res.render("petition");
-        }
-    }
+/////// PETITION /////////
+
+app.get("/petition", requireNoSignature, (req, res) => {
+    res.render("petition");
+    // if (!req.session.userId) {
+    //     res.redirect("/registration");
+    // } else {
+    //     if (req.session.signed) {
+    //         res.redirect("/thanks");
+    //     } else {
+    //         res.render("petition");
+    //     }
+    // }
 });
 
-app.get("/thanks", (req, res) => {
-    if (req.session.signed) {
-        const sigId = req.session.signatureId;
-        db.getSignature(sigId)
-            .then(({ rows }) => {
-                let signImage = rows[0].signature;
-                res.render("thanks", {
-                    signImage,
-                });
-            })
-            .catch((e) => {
-                console.log("error in getSignature:", e);
-            });
-    } else {
-        res.render("petition");
-    }
-});
-
-app.get("/signers", (req, res) => {
-    db.getSigners()
-        .then(({ rows }) => {
-            // console.log(rows);
-            res.render("signers", {
-                rows,
-            });
-        })
-        .catch((e) => {
-            console.log("error:", e);
-        });
-});
-
-app.get("/signers/:city", (req, res) => {
-    db.getByCity(req.params.city).then(({ rows }) => {
-        console.log(rows);
-        res.render("cities", {
-            rows,
-        }).catch((e) => console.log("error in cities", e));
-    });
-});
-
-app.post("/petition", (req, res) => {
-    console.log("req.body", req.body);
+app.post("/petition", requireNoSignature, (req, res) => {
+    // console.log("req.body", req.body);
     db.addUser(req.body.signature)
         .then(({ rows }) => {
             // console.log("req.session", req.session);
@@ -121,11 +93,70 @@ app.post("/petition", (req, res) => {
     // res.cookie("signed", true);
 });
 
-app.get("/registration", (req, res) => {
+/////// THANKS /////////
+
+app.get("/thanks", requireSignature, (req, res) => {
+    if (req.session.signed) {
+        const sigId = req.session.signatureId;
+        db.getSignature(sigId)
+            .then(({ rows }) => {
+                let signImage = rows[0].signature;
+                res.render("thanks", {
+                    signImage,
+                });
+            })
+            .catch((e) => {
+                console.log("error in getSignature:", e);
+            });
+    } else {
+        res.render("petition");
+    }
+});
+
+app.post("/thanks", requireSignature, (req, res) => {
+    db.deleteSignature(req.session.id)
+        .then((result) => {
+            req.session.signatureId = null;
+            res.redirect("/petition");
+        })
+        .catch((e) =>
+            res.render("thanks", {
+                errorMsg: "Sorry, we could not delete your signature",
+            })
+        );
+});
+
+/////// SIGNERS /////////
+
+app.get("/signers", (req, res) => {
+    db.getSigners()
+        .then(({ rows }) => {
+            // console.log(rows);
+            res.render("signers", {
+                rows,
+            });
+        })
+        .catch((e) => {
+            console.log("error:", e);
+        });
+});
+
+app.get("/signers/:city", requireSignature, (req, res) => {
+    db.getByCity(req.params.city).then(({ rows }) => {
+        console.log(rows);
+        res.render("cities", {
+            rows,
+        }).catch((e) => console.log("error in cities", e));
+    });
+});
+
+/////// REGISTRATION /////////
+
+app.get("/registration", requireLoggedOutUser, (req, res) => {
     res.render("registration");
 });
 
-app.post("/registration", (req, res) => {
+app.post("/registration", requireLoggedOutUser, (req, res) => {
     // console.log(req.body);
     if (
         !req.body.firstname ||
@@ -147,21 +178,28 @@ app.post("/registration", (req, res) => {
                 )
                     .then(({ rows }) => {
                         //setting up cookie
-                        console.log("userID in registration:", rows[0].id);
+                        // console.log("userID in registration:", rows[0].id);
                         req.session.userId = rows[0].id;
                         res.redirect("/profile");
                     })
                     .catch((e) => console.log(e));
             })
-            .catch((e) => console.log("error in hash", e));
+            .catch((e) => {
+                res.render("registration", {
+                    errUniq: "This email is already used, please log in",
+                });
+                console.log("error in hash", e);
+            });
     }
 });
 
-app.get("/login", (req, res) => {
+/////// LOGIN /////////
+
+app.get("/login", requireLoggedOutUser, (req, res) => {
     res.render("login");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", requireLoggedOutUser, (req, res) => {
     if (!req.body.email || !req.body.password) {
         res.render("login", {
             errorMsg: "Please fill out all the fields",
@@ -170,7 +208,7 @@ app.post("/login", (req, res) => {
         let userId;
         db.isUser(req.body.email)
             .then(({ rows }) => {
-                console.log("rows in login", rows);
+                // console.log("rows in login", rows);
                 userId = rows[0].id;
                 return rows[0].password;
             })
@@ -178,7 +216,7 @@ app.post("/login", (req, res) => {
                 compare(req.body.password, password)
                     .then((auth) => {
                         req.session.userId = userId;
-                        console.log("cookie in login", req.session);
+                        // console.log("cookie in login", req.session);
                         res.redirect("/petition");
                     })
                     .catch((e) => res.render("login"), {
@@ -189,12 +227,14 @@ app.post("/login", (req, res) => {
     }
 });
 
+/////// PROFILE /////////
+
 app.get("/profile", (req, res) => {
     res.render("profile");
 });
 
 app.post("/profile", (req, res) => {
-    console.log("userID in profile:", req.session.userId);
+    // console.log("userID in profile:", req.session.userId);
     db.userProfile(
         req.body.age,
         req.body.city,
@@ -203,6 +243,64 @@ app.post("/profile", (req, res) => {
     )
         .then(() => res.redirect("/petition"))
         .catch((e) => console.log(e));
+});
+
+/////// EDIT PROFILE /////////
+
+app.get("/edit", (req, res) => {
+    // console.log(req.session.userId);
+    db.prepopulateFields(req.session.userId)
+        .then(({ rows }) => {
+            // console.log(rows);
+            res.render("edit", {
+                rows,
+            });
+        })
+        .catch((e) => console.log(e));
+});
+
+app.post("/edit", (req, res) => {
+    // console.log(req.body);
+    if (!req.body.password) {
+        db.updateUsers(
+            req.session.userId,
+            req.body.firstname,
+            req.body.lastname,
+            req.body.email
+        )
+            .then((result) => {
+                db.updateUserProfiles(
+                    req.body.age,
+                    req.body.city,
+                    req.body.url,
+                    req.session.userId
+                )
+                    .then((result) =>
+                        res.render("edit", {
+                            msg: "Your changes have been saved",
+                        })
+                    )
+                    .catch((e) => console.log(e));
+            })
+            .catch((e) => console.log(e));
+    } else {
+        db.updatePassword(
+            req.body.first,
+            req.body.last,
+            req.body.email,
+            req.body.password
+        )
+            .then((result) =>
+                res.render("edit", {
+                    msg: "Your changes have been saved",
+                })
+            )
+            .catch((e) =>
+                res.render("edit", {
+                    errorMsg: "Unfortunately, your chages could not be saved",
+                })
+            );
+    }
 });
 
 app.listen(process.env.PORT || 8080, () =>

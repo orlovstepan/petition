@@ -1,6 +1,75 @@
 * {
-    background-color: wheat;
+    background-color: white (252, 246, 237);
+    font-family: "Courier New", Courier, monospace;
 }
-canvas {
+
+/* h1 {
     border: 5px solid black;
+} */
+
+/* body {
+    display: flex;
+} */
+
+#registration {
+    margin-top: 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#registration_heading {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 23%;
+    margin-top: 13%;
+}
+
+.registration_fields {
+    position: relative;
+    width: 20%;
+    margin-top: 0px;
+    border-radius: 15%;
+}
+
+#register {
+    background-color: black;
+    margin-top: 10px;
+    color: white;
+}
+
+.container-petition {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+}
+
+.container-petition h1 {
+    font-size: 20px;
+}
+
+.container-petition h2 {
+    margin-top: -2px;
+    font-size: 18px;
+}
+
+#petition {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    border: 3px solid black;
+    max-width: 400px;
+    max-height: 200px;
+}
+
+#submit {
+    margin-top: 3%;
 }

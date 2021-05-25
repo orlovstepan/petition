@@ -1,16 +1,54 @@
-<form method="POST">
-    <label for="firstname"> First Name</label>
-    <input type="text" id="firstname" name="firstname" />
-    <label for="lastname"> Last Name</label>
-    <input type="text" id="lastname" name="lastname" />
-    <label for="email"> Email Address</label>
-    <input type="text" name="email" id="email" />
-    <label for="password"> Password</label>
-    <input type="password" name="password" id="password" />
-    <button id="register">Register</button>
+{{! <h1>
+    <a
+        href=""
+        class="typewrite"
+        data-period="2000"
+        data-type='[ "Hi, Im Si.", "I am Creative.", "I Love Design.", "I Love to Develop." ]'
+    >
+        <span class="wrap"></span>
+    </a>
+</h1> }}
+
+<h1 id="registration_heading">This petition does not change anything. Sign if
+    you're cool with it.</h1>
+
+<form method="POST" id="registration">
+    <label for="firstname"> first name</label>
+    <input
+        type="text"
+        id="firstname"
+        name="firstname"
+        class="registration_fields"
+    />
+    <label for="lastname"> last name</label>
+    <input
+        type="text"
+        id="lastname"
+        name="lastname"
+        class="registration_fields"
+    />
+    <label for="email"> email address</label>
+    <input type="text" name="email" id="email" class="registration_fields" />
+    <label for="password"> password</label>
+    <input
+        type="password"
+        name="password"
+        id="password"
+        class="registration_fields"
+    />
+    <button id="register">register</button>
     <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 </form>
 
 {{#if errorMsg}}
     <p>{{errorMsg}}</p>
 {{/if}}
+
+{{#if errUniq}}
+    <p>{{errUniq}}</p>
+{{/if}}
+
+{{! <div class="typewriter">
+    <h1>This petition doesn't change anything. Sign it if you're cool with it.
+    </h1>
+</div> }}

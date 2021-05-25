@@ -1,7 +1,7 @@
 const signatureField = document.getElementById("signature-field");
 const signature = document.getElementById("signature");
 const ctx = signatureField.getContext("2d");
-ctx.lineWidth = 5;
+ctx.lineWidth = 3;
 ctx.strokeStyle = "black";
 
 console.log(signature.value);
@@ -16,8 +16,6 @@ let drawing = (ctx, x1, y1, x2, y2) => {
     ctx.lineTo(x2, y2);
     ctx.stroke();
 };
-
-const submit = document.getElementById("submit");
 
 signatureField.addEventListener("mousedown", (e) => {
     draw = true;
