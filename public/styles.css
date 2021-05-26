@@ -11,8 +11,23 @@
     display: flex;
 } */
 
+.container-registration p {
+    margin-left: 37%;
+}
+
+.container-registration #errorMsg {
+    margin-left: 0%;
+    color: red;
+    font-size: 20px;
+}
+
+.container-registration a {
+    background-color: black;
+    color: white;
+}
+
 #registration {
-    margin-top: 5%;
+    margin-top: 2%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -38,6 +53,46 @@
     background-color: black;
     margin-top: 10px;
     color: white;
+}
+
+.container-login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15%;
+}
+
+.container-login a {
+    background-color: black;
+    color: white;
+}
+
+.container-login p {
+    margin-top: -1%;
+}
+
+#login-error {
+    margin-top: 2%;
+    color: red;
+    font-size: 20px;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#login {
+    background-color: black;
+    margin-top: 10px;
+    color: white;
+}
+
+.login-fields {
+    border-radius: 15%;
+    margin-top: 1%;
 }
 
 .container-petition {
@@ -72,4 +127,17 @@ canvas {
 
 #submit {
     margin-top: 3%;
+}
+
+button {
+    transition: transform 0.5s;
+    -webkit-transition: background-color 2s ease-out;
+    -moz-transition: background-color 2s ease-out;
+    -o-transition: background-color 2s ease-out;
+    transition: background-color 2s ease-out;
+}
+
+button:hover {
+    transform: scale(1.1);
+    background-color: white;
 }

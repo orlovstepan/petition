@@ -165,7 +165,7 @@ app.post("/registration", requireLoggedOutUser, (req, res) => {
         !req.body.password
     ) {
         res.render("registration", {
-            errorMsg: "Please fill out all the fields",
+            errorMsg: "please fill out all the fields",
         });
     } else {
         hash(req.body.password)
@@ -182,12 +182,15 @@ app.post("/registration", requireLoggedOutUser, (req, res) => {
                         req.session.userId = rows[0].id;
                         res.redirect("/profile");
                     })
-                    .catch((e) => console.log(e));
+                    .catch((e) => {
+                        res.render("registration", {
+                            errUniq:
+                                "this email is already used, please log in",
+                        });
+                        console.log("error in registration", e);
+                    });
             })
             .catch((e) => {
-                res.render("registration", {
-                    errUniq: "This email is already used, please log in",
-                });
                 console.log("error in hash", e);
             });
     }
@@ -202,25 +205,35 @@ app.get("/login", requireLoggedOutUser, (req, res) => {
 app.post("/login", requireLoggedOutUser, (req, res) => {
     if (!req.body.email || !req.body.password) {
         res.render("login", {
-            errorMsg: "Please fill out all the fields",
+            errorMsg: "please fill out all the fields",
         });
     } else {
         let userId;
         db.isUser(req.body.email)
+            // .then(({ rows }) => {
+            //     // console.log("rows in login", rows);
+            //     return rows[0].password;
+            // })
             .then(({ rows }) => {
-                // console.log("rows in login", rows);
                 userId = rows[0].id;
-                return rows[0].password;
-            })
-            .then((password) => {
-                compare(req.body.password, password)
+                // console.log(rows);
+                // console.log("req.body.password", req.body.password);
+                compare(req.body.password, rows[0].password)
                     .then((auth) => {
-                        req.session.userId = userId;
-                        // console.log("cookie in login", req.session);
-                        res.redirect("/petition");
+                        if (auth) {
+                            req.session.userId = userId;
+                            // console.log("cookie in login", req.session);
+                            // console.log("auth", auth);
+                            res.redirect("/petition");
+                        } else {
+                            // console.log("rendering with error");
+                            res.render("login", {
+                                errorMsg: "email or password is incorrect",
+                            });
+                        }
                     })
                     .catch((e) => res.render("login"), {
-                        errorMsg: "Email or Password is incorrect",
+                        errorMsg: "email or password is incorrect",
                     });
             })
             .catch((e) => console.log("error in login", e));
@@ -277,7 +290,7 @@ app.post("/edit", (req, res) => {
                 )
                     .then((result) =>
                         res.render("edit", {
-                            msg: "Your changes have been saved",
+                            msg: "your changes have been saved",
                         })
                     )
                     .catch((e) => console.log(e));
@@ -292,12 +305,12 @@ app.post("/edit", (req, res) => {
         )
             .then((result) =>
                 res.render("edit", {
-                    msg: "Your changes have been saved",
+                    msg: "your changes have been saved",
                 })
             )
             .catch((e) =>
                 res.render("edit", {
-                    errorMsg: "Unfortunately, your chages could not be saved",
+                    errorMsg: "unfortunately, your chages could not be saved",
                 })
             );
     }

@@ -1,13 +1,23 @@
-Please log in
-<form method="POST">
-    <label for="email"> Email Address</label>
-    <input type="text" name="email" id="email" />
-    <label for="password"> Password</label>
-    <input type="password" name="password" id="password" />
-    <button id="login">Log in</button>
-    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-</form>
+<div class="container-login">
+    <h1>please log in</h1>
+    <p>or
+        <a href="/registration">register</a>
+        instead</p>
+    <form method="POST" id="login-form">
+        <label for="email"> email address</label>
+        <input type="text" name="email" id="email" class="login-fields" />
+        <label for="password"> password</label>
+        <input
+            type="password"
+            name="password"
+            id="password"
+            class="login-fields"
+        />
+        <button id="login">log in</button>
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 
-{{#if errorMsg}}
-    <p>{{errorMsg}}</p>
-{{/if}}
+        {{#if errorMsg}}
+            <p id="login-error">{{errorMsg}}</p>
+        {{/if}}
+    </form>
+</div>

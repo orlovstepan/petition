@@ -8,9 +8,9 @@ const db = spicedPg(
 module.exports.getSigners = () => {
     return db.query(`
     SELECT first, last, user_profiles.age, user_profiles.city FROM users
-    JOIN user_profiles
+    LEFT OUTER JOIN user_profiles
     ON users.id = user_profiles.id
-    JOIN signatures
+    LEFT OUTER JOIN signatures
     ON signatures.id = users.id; 
     `);
 };
