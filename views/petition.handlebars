@@ -1,6 +1,13 @@
+<ul id="navigation-bar">
+    <li><a href="/edit">profile</a></li>
+    <li><a href="/petition">signature</a></li>
+    <li><a href="/signers">signers</a> </li>
+    <li><a href="/logout">logout</a></li>
+</ul>
+
 <div class="container-petition">
-    <h1>don't miss your chance to leave things as they are.</h1>
-    <h2>sign below</h2>
+    <h1>leave things as they are</h1>
+    <h2>sign below*</h2>
     <form method="POST" id="petition">
         {{! <input
         type="text"
@@ -14,5 +21,7 @@
         <canvas id="signature-field"></canvas>
         <button id="submit">submit</button>
     </form>
+    <h3>*this is probably the only chance in your life not to change anything
+        with your signature</h3>
     <script src="/script.js"></script>
 </div>

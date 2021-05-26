@@ -19,7 +19,7 @@ module.exports.requireLoggedOutUser = (req, res, next) => {
 };
 
 module.exports.requireNoSignature = (req, res, next) => {
-    if (req.session.signed) {
+    if (req.session.signatureId) {
         res.redirect("/thanks");
     } else {
         next();

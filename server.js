@@ -83,9 +83,7 @@ app.post("/petition", requireNoSignature, (req, res) => {
             const signImage = rows[0].signature;
             // console.log("signature", signature);
             // res.redirect("/thanks");
-            res.render("thanks", {
-                signImage,
-            });
+            res.redirect("/thanks");
         })
         .catch((e) => {
             console.log("error", e);
@@ -114,7 +112,8 @@ app.get("/thanks", requireSignature, (req, res) => {
 });
 
 app.post("/thanks", requireSignature, (req, res) => {
-    db.deleteSignature(req.session.id)
+    // console.log("req.session", req.session);
+    db.deleteSignature(req.session.signatureId)
         .then((result) => {
             req.session.signatureId = null;
             res.redirect("/petition");
@@ -131,7 +130,7 @@ app.post("/thanks", requireSignature, (req, res) => {
 app.get("/signers", (req, res) => {
     db.getSigners()
         .then(({ rows }) => {
-            // console.log(rows);
+            console.log(rows);
             res.render("signers", {
                 rows,
             });
@@ -142,12 +141,15 @@ app.get("/signers", (req, res) => {
 });
 
 app.get("/signers/:city", requireSignature, (req, res) => {
-    db.getByCity(req.params.city).then(({ rows }) => {
-        console.log(rows);
-        res.render("cities", {
-            rows,
-        }).catch((e) => console.log("error in cities", e));
-    });
+    db.getByCity(req.params.city)
+        .then(({ rows }) => {
+            console.log(rows);
+            res.render("cities", {
+                rows,
+                city: req.params.city,
+            });
+        })
+        .catch((e) => console.log("error in cities", e));
 });
 
 /////// REGISTRATION /////////
@@ -261,9 +263,9 @@ app.post("/profile", (req, res) => {
 /////// EDIT PROFILE /////////
 
 app.get("/edit", (req, res) => {
-    // console.log(req.session.userId);
     db.prepopulateFields(req.session.userId)
         .then(({ rows }) => {
+            // console.log("req.session.userId", req.body);
             // console.log(rows);
             res.render("edit", {
                 rows,
@@ -288,32 +290,60 @@ app.post("/edit", (req, res) => {
                     req.body.url,
                     req.session.userId
                 )
-                    .then((result) =>
-                        res.render("edit", {
-                            msg: "your changes have been saved",
-                        })
-                    )
+                    .then((result) => {
+                        db.prepopulateFields(req.session.userId).then(
+                            ({ rows }) => {
+                                res.render("edit", {
+                                    rows,
+                                    msg: "your changes have been saved",
+                                });
+                            }
+                        );
+                    })
                     .catch((e) => console.log(e));
             })
             .catch((e) => console.log(e));
     } else {
-        db.updatePassword(
-            req.body.first,
-            req.body.last,
-            req.body.email,
-            req.body.password
-        )
-            .then((result) =>
-                res.render("edit", {
-                    msg: "your changes have been saved",
-                })
+        hash(req.body.password).then((hashedPw) => {
+            db.updatePassword(
+                req.session.userId,
+                req.body.firstname,
+                req.body.lastname,
+                req.body.email,
+                hashedPw
             )
-            .catch((e) =>
-                res.render("edit", {
-                    errorMsg: "unfortunately, your chages could not be saved",
+                .then((result) => {
+                    db.updateUserProfiles(
+                        req.body.age,
+                        req.body.city,
+                        req.body.url,
+                        req.session.userId
+                    );
                 })
-            );
+                .then((result) => {
+                    db.prepopulateFields(req.session.userId).then(
+                        ({ rows }) => {
+                            res.render("edit", {
+                                rows,
+                                msg: "your changes have been saved",
+                            });
+                        }
+                    );
+                })
+                .catch((e) =>
+                    res.render("edit", {
+                        errorMsg:
+                            "unfortunately, your chages could not be saved",
+                    })
+                );
+        });
     }
+});
+
+app.get("/logout", (req, res) => {
+    req.session.userId = null;
+    console.log(req.session);
+    res.redirect("/login");
 });
 
 app.listen(process.env.PORT || 8080, () =>

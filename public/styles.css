@@ -3,6 +3,10 @@
     font-family: "Courier New", Courier, monospace;
 }
 
+body {
+    background-image: url("background.jpeg");
+}
+
 /* h1 {
     border: 5px solid black;
 } */
@@ -112,6 +116,10 @@
     font-size: 18px;
 }
 
+.container-petition h3 {
+    font-size: 15px;
+}
+
 #petition {
     display: flex;
     flex-direction: column;
@@ -123,21 +131,101 @@ canvas {
     border: 3px solid black;
     max-width: 400px;
     max-height: 200px;
+    cursor: url("cursor.png"), pointer;
 }
 
 #submit {
     margin-top: 3%;
 }
 
+.container-edit {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+}
+
+#edit-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#edit-form button {
+    margin-top: 5%;
+}
+
+.container-thanks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5%;
+}
+
+.container-thanks button {
+    background-color: black;
+    color: white;
+    margin-left: 42%;
+}
+
+.container-signers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5%;
+}
+
+.container-signers ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#navigation-bar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+}
+
+#navigation-bar a {
+    color: black;
+    text-decoration: none;
+}
+
+.container-city {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5%;
+}
+
+.container-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15%;
+}
+
+.container-profile form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container-profile button {
+    margin-top: 5%;
+}
+
 button {
     transition: transform 0.5s;
-    -webkit-transition: background-color 2s ease-out;
-    -moz-transition: background-color 2s ease-out;
-    -o-transition: background-color 2s ease-out;
-    transition: background-color 2s ease-out;
+    background-color: black;
+    color: white;
 }
 
 button:hover {
     transform: scale(1.1);
-    background-color: white;
 }

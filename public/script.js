@@ -19,15 +19,15 @@ let drawing = (ctx, x1, y1, x2, y2) => {
 
 signatureField.addEventListener("mousedown", (e) => {
     draw = true;
-    x = e.offsetX;
-    y = e.offsetY;
+    x = e.offsetX + 5;
+    y = e.offsetY + 15;
 });
 
 signatureField.addEventListener("mousemove", (e) => {
     if (draw === true) {
-        drawing(ctx, x, y, e.offsetX, e.offsetY);
-        x = e.offsetX;
-        y = e.offsetY;
+        drawing(ctx, x, y, e.offsetX + 5, e.offsetY + 15);
+        x = e.offsetX + 5;
+        y = e.offsetY + 15;
     }
 });
 

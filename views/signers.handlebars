@@ -1,14 +1,28 @@
-<h1>Who else signed the petition</h1>
-<ul>
-    {{#rows}}
-        <li>
-            {{first}}
-            {{last}}
-            |
-            {{age}}
-            |
-            <a href="/signers/{{city}}">{{city}}</a>
-        </li>
-    {{/rows}}
-
+<ul id="navigation-bar">
+    <li><a href="/edit">profile</a></li>
+    <li><a href="/petition">signature</a></li>
+    <li><a href="/signers">signers</a> </li>
+    <li><a href="/logout">logout</a></li>
 </ul>
+
+<div class="container-signers">
+    <h1>who else signed the petition</h1>
+    <ul>
+        {{#rows}}
+            <li>
+                {{#if url}}
+                    <a href="{{url}}">
+                        {{first}}
+                        {{last}}
+                    </a>
+                {{else}}<p>{{first}}
+                        {{last}}
+                {{/if}}
+                |
+                {{age}}
+                |
+                <a href="/signers/{{city}}">{{city}}</a>
+            </li>
+        {{/rows}}
+    </ul>
+</div>

@@ -1,7 +1,18 @@
-<p>Thanks for signing the petition!</p>
-<img src="{{signImage}}" alt="signature" />
-<a href="/signers">Take a look at the other signers!</a>
-<form method="POST">
-    <button>Delete your signature</button>
-    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-</form>
+<ul id="navigation-bar">
+    <li><a href="/edit">profile</a></li>
+    <li><a href="/petition">signature</a></li>
+    <li><a href="/signers">signers</a> </li>
+    <li><a href="/logout">logout</a></li>
+</ul>
+
+<div class="container-thanks">
+    <h1>thanks for signing the petition. or not. whatever</h1>
+    <img src="{{signImage}}" alt="signature" />
+    <form method="POST">
+        <p>delete your signature if you want. nothing will change anyway</p>
+        <button>delete</button>
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+    </form>
+    <a href="/signers">take a look at the other "i don't want to change
+        anything" people</a>
+</div>
