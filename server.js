@@ -24,6 +24,19 @@ if (process.env.NODE_ENV == "production") {
     });
 }
 
+function checkUrl(url) {
+    if (url.startsWith("http:") || url.startsWith("https")) {
+        return url;
+    } else if (url.length != 0) {
+        url = `http://${url}`;
+    } else if (url.startsWith("javascript")) {
+        url = null;
+        return url;
+    } else {
+        console.log("no url");
+    }
+}
+
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 // app.use(cookieParser());
@@ -217,6 +230,11 @@ app.post("/login", requireLoggedOutUser, (req, res) => {
             //     return rows[0].password;
             // })
             .then(({ rows }) => {
+                if (!rows[0]) {
+                    return res.render("login", {
+                        errorMsg: "this user doesn't exist",
+                    });
+                }
                 userId = rows[0].id;
                 // console.log(rows);
                 // console.log("req.body.password", req.body.password);
@@ -250,10 +268,12 @@ app.get("/profile", (req, res) => {
 
 app.post("/profile", (req, res) => {
     // console.log("userID in profile:", req.session.userId);
+    checkUrl(req.body.website);
+    console.log(req.body);
     db.userProfile(
         req.body.age,
         req.body.city,
-        req.body.url,
+        req.body.website,
         req.session.userId
     )
         .then(() => res.redirect("/petition"))
@@ -276,6 +296,7 @@ app.get("/edit", (req, res) => {
 
 app.post("/edit", (req, res) => {
     // console.log(req.body);
+    checkUrl(req.body.website);
     if (!req.body.password) {
         db.updateUsers(
             req.session.userId,
@@ -287,7 +308,7 @@ app.post("/edit", (req, res) => {
                 db.updateUserProfiles(
                     req.body.age,
                     req.body.city,
-                    req.body.url,
+                    req.body.website,
                     req.session.userId
                 )
                     .then((result) => {
