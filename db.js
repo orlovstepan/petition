@@ -9,9 +9,9 @@ module.exports.getSigners = () => {
     return db.query(`
     SELECT first, last, user_profiles.age, user_profiles.city, user_profiles.url FROM users
     LEFT OUTER JOIN user_profiles
-    ON users.id = user_profiles.id
+    ON users.id = user_profiles.user_id
     JOIN signatures
-    ON signatures.id = users.id; 
+    ON signatures.user_id = users.id; 
     `);
 };
 
@@ -29,14 +29,14 @@ module.exports.getByCity = (city) => {
     return db.query(q, params);
 };
 
-module.exports.addUser = (signature) => {
+module.exports.addUser = (signature, userId) => {
     const q = `
-    INSERT INTO signatures (signature)
-    values ($1)
+    INSERT INTO signatures (signature, user_id)
+    values ($1, $2)
     RETURNING *
     `;
 
-    const params = [signature];
+    const params = [signature, userId];
 
     return db.query(q, params);
 };

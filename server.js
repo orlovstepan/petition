@@ -73,7 +73,7 @@ app.get("/petition", requireNoSignature, (req, res) => {
 
 app.post("/petition", requireNoSignature, (req, res) => {
     // console.log("req.body", req.body);
-    db.addUser(req.body.signature)
+    db.addUser(req.body.signature, req.session.userId)
         .then(({ rows }) => {
             // console.log("req.session", req.session);
             req.session.signed = true;
